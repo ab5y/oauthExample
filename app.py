@@ -15,6 +15,10 @@ app.config['OAUTH_CREDENTIALS'] = {
     'twitter': {
         'id': 'nbuT4BXa8k82JqjbR8nI68KwM',
         'secret': '17xMljJO2KRwelygKVxhE5ZaxoC3DAj9keMvVO372qzF23CTG8'
+    },
+    'google': {
+    	'id': '117651806022-p0u07crof7qh9gfpqv5qc5dpcghb4d63.apps.googleusercontent.com',
+    	'secret': 'YZFlaStt2Kt6PTt25-egzP9D'
     }
 }
 
