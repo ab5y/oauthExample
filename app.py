@@ -1,8 +1,10 @@
-from flask import Flask, redirect, url_for, render_template
+from flask import Flask, redirect, url_for, render_template, request, session
 from flask.ext.sqlalchemy import SQLAlchemy
 from flask.ext.login import LoginManager, UserMixin, login_user, logout_user,\
 	current_user
 from oauth import OAuthSignIn
+from facebook import get_user_from_cookie, GraphAPI, GraphAPIError
+import requests
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'top secret!'
@@ -22,6 +24,12 @@ app.config['OAUTH_CREDENTIALS'] = {
     }
 }
 
+# Facebook app details
+FB_APP_ID = '1642955085978865'
+FB_APP_NAME = 'testOAuth'
+FB_APP_SECRET = '8472b62a4c53bd729472d93ed221b204'
+FB_USER_ID = ''
+FB_ACCESS_TOKEN = 'CAACEdEose0cBAM7I1BVCsqJWrBDdsaOXM0W8yYtyStfRhwx3DXIGRLUqxZA9r0PlYmqtLylvqvwJDaZAnhlcZA4CnjEdIJRmMHX52uzvy0cLMhlMTGkg05ZCN95wtDztf0uy9p2r3s33xT7bjncR7DOCIBQGhKCYBYdPoU62OXZBc1fHWPmAn2Nte7KQ8xZBtNTpl77qDj0AZDZD'
 
 db = SQLAlchemy(app)
 lm = LoginManager(app)
@@ -47,6 +55,41 @@ def logout():
 	logout_user()
 	return redirect(url_for('index'))
 
+@app.route('/facebook')
+def facebook():
+	# Attempt to get the short term access token for the current user
+	result = get_fb_token(FB_APP_ID, FB_APP_SECRET)
+	# If there is no result, we assume the user is not logged in.
+	if result:
+		graph = GraphAPI(access_token=FB_ACCESS_TOKEN, version='2.5')
+		resp = graph.get_object('me/accounts')
+		print "Response: ", resp
+		attachment =  {
+			'name': 'Mystic Light',
+			'link': 'http://www.mysticlight.in/',
+			'caption': 'Check out this site!',
+			'description': 'Oh wow.',
+			'picture': 'http://www.mysticlight.in/thumbnail.jpg'
+		}
+		try:
+			fb_response = graph.put_wall_post(message="Hello World!", attachment=attachment)
+			print fb_response
+		except GraphAPIError as e:
+			print 'Something went wrong:', e.type, e.message
+		# friends = graph2.get_object("me/friends")
+	
+		# for friend in friends['data']:
+		# 	print "{0} has id {1}".format(friend['name'].encode('utf-8'), friend['id'])
+	return render_template('facebook.html')
+
+def get_fb_token(app_id, app_secret):           
+    payload = {'grant_type': 'client_credentials', 'client_id': app_id, 'client_secret': app_secret}
+    file1 = requests.post('https://graph.facebook.com/oauth/access_token?', params = payload)
+    # print file1.text #to test what the FB api responded with
+    result = file1.text.split("=")[1]
+    print file1.text #to test the TOKEN
+    return result
+
 @app.route('/authorize/<provider>')
 def oauth_authorize(provider):
 	if not current_user.is_anonymous:
@@ -69,6 +112,9 @@ def oauth_callback(provider):
 		db.session.add(user)
 		db.session.commit()
 	login_user(user, True)
+	if provider == 'facebook':
+		FB_USER_ID = social_id.split('$')[1]
+		return redirect(url_for('facebook'))
 	return redirect(url_for('index'))
 
 if __name__ == '__main__':

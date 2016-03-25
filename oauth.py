@@ -53,7 +53,6 @@ class FacebookSignIn(OAuthSignIn):
 		)
 
 	def callback(self):
-		print request.args['code']
 		if 'code' not in request.args:
 			return None, None, None
 		oauth_session = self.service.get_auth_session(
@@ -144,7 +143,6 @@ class GoogleSignIn(OAuthSignIn):
 	def callback(self):
 		dump = json.dumps(request.args['code'])
 		data = json.loads(dump)
-		print data
 		if 'code' not in request.args:
 			return None, None, None
 		oauth_session = self.service.get_auth_session(
@@ -156,7 +154,6 @@ class GoogleSignIn(OAuthSignIn):
 			decoder=json.loads
 		)
 		me = oauth_session.get('').json()
-		print me
 		return (
 			'google$' + me['email'],
 			me['name'],

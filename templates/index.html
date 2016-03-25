@@ -1,46 +1,27 @@
-<html>
-    <head>
-        <link rel=stylesheet type=text/css href="{{ url_for('static', filename='auth-buttons.css') }}">
-        <title>OAuth Flask Demo</title>
-    </head>
-    <body>
-        <div id="fb-root"></div>
-        <script>
-        (
-            function(d, s, id) {
-                var js, fjs = d.getElementsByTagName(s)[0];
-                if (d.getElementById(id)) return;
-                js = d.createElement(s); js.id = id;
-                js.src = "//connect.facebook.net/en_GB/sdk.js#xfbml=1&version=v2.5&appId=142643265832209";
-                fjs.parentNode.insertBefore(js, fjs);
-            }
-            (document, 'script', 'facebook-jssdk')
-        );
-        </script>
-        <h1>OAuth Demo</h1>
-        {% for message in get_flashed_messages() %}
-            <p><b>Error</b>: {{ message }}</p>
-        {% endfor %}
-        {% if current_user.is_authenticated %}
-            <h2>Hi, {{ current_user.nickname }}!</h2>
-            <p><a href="{{ url_for('logout') }}">Logout</a></p>
-        {% else %}
-            <h2>I don't know you!</h2>
-            <p>
-                <a class="btn-auth btn-twitter large" href="{{ url_for('oauth_authorize', provider='twitter') }}">
-                    Sign in with <b>Twitter</b>
-                </a>
-            </p>
-            <p>
-                <a class="btn-auth btn-facebook large" href="{{ url_for('oauth_authorize', provider='facebook') }}">
-                    Sign in with <b>Facebook</b>
-                </a>
-            </p>
-            <p>
-                <a class="btn-auth btn-google large" href="{{ url_for('oauth_authorize', provider='google') }}">
-                    Sign in with <b>Google</b>
-                </a>
-            </p>
-        {% endif %}
-    </body>
-</html>
+{% extends "base.html" %}
+{% block content %}
+{% for message in get_flashed_messages() %}
+    <p><b>Error</b>: {{ message }}</p>
+{% endfor %}
+{% if current_user.is_authenticated %}
+    <h2>Hi, {{ current_user.nickname }}!</h2>
+    <p><a href="{{ url_for('logout') }}">Logout</a></p>
+{% else %}
+    <h2>I don't know you!</h2>
+    <p>
+        <a class="btn-auth btn-facebook large" href="{{ url_for('oauth_authorize', provider='facebook') }}">
+            Sign in with <b>Facebook</b>
+        </a>
+    </p>
+    <p>
+        <a class="btn-auth btn-twitter large" href="{{ url_for('oauth_authorize', provider='twitter') }}">
+            Sign in with <b>Twitter</b>
+        </a>
+    </p>
+    <p>
+        <a class="btn-auth btn-google large" href="{{ url_for('oauth_authorize', provider='google') }}">
+            Sign in with <b>Google</b>
+        </a>
+    </p>
+{% endif %}
+{% endblock %}
